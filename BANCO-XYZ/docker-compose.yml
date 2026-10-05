@@ -1,0 +1,68 @@
+services:
+  mysql-db:
+    image: mysql:8.0
+    container_name: mysql-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: desaPOO#2
+      MYSQL_DATABASE: banco_xyz
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pdesaPOO#2"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  banco-core:
+    build: ./banco-core
+    container_name: banco-core
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/banco_xyz?useSSL=false&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=desaPOO#2
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+
+
+  bff-web:
+    build: ./bff-web
+    container_name: bff-web
+    ports:
+      - "8081:8081"
+    environment:
+      - CORE_BANCO_BASE_URL=http://banco-core:8080
+      - ATM_PASSWORD=atm123
+      - WEB_PASSWORD=web123
+      - MOBILE_PASSWORD=mobile123
+    depends_on:
+      - banco-core
+
+  bff-mobile:
+    build: ./bff-mobile
+    container_name: bff-mobile
+    ports:
+      - "8082:8082"
+    environment:
+      - CORE_BANCO_BASE_URL=http://banco-core:8080
+      - ATM_PASSWORD=atm123
+      - WEB_PASSWORD=web123
+      - MOBILE_PASSWORD=mobile123
+    depends_on:
+      - banco-core
+
+  bff-atm:
+    build: ./bff-atm
+    container_name: bff-atm
+    ports:
+      - "8083:8083"
+    environment:
+      - CORE_BANCO_BASE_URL=http://banco-core:8080
+      - ATM_PASSWORD=atm123
+      - WEB_PASSWORD=web123
+      - MOBILE_PASSWORD=mobile123
+    depends_on:
+      - banco-core
