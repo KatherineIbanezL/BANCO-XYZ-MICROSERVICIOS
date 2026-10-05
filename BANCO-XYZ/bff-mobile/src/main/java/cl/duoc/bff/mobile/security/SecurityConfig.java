@@ -1,6 +1,5 @@
 package cl.duoc.bff.mobile.security;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
@@ -8,73 +7,35 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
-
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    @Bean
-    UserDetailsService users(
-            PasswordEncoder encoder,
-            @Value("${security.users.atm.password}") String atmPassword,
-            @Value("${security.users.mobile.password}") String mobilePassword,
-            @Value("${security.users.web.password}") String webPassword) {
-
-        UserDetails atm = User.builder()
-                .username("atmuser")
-                .password(encoder.encode(atmPassword))
-                .roles("ATM")
-                .build();
-
-        UserDetails mobile = User.builder()
-                .username("mobileuser")
-                .password(encoder.encode(mobilePassword))
-                .roles("MOBILE")
-                .build();
-
-        UserDetails web = User.builder()
-                .username("webuser")
-                .password(encoder.encode(webPassword))
-                .roles("WEB")
-                .build();
-
-        return new InMemoryUserDetailsManager(atm, mobile, web);
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/mobile/**").hasRole("MOBILE")
-                        .anyRequest().authenticated())
-                .httpBasic(Customizer.withDefaults())
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling(errors -> errors
-                        .authenticationEntryPoint((request, response, ex) -> {
-                            response.setStatus(HttpStatus.UNAUTHORIZED.value());
-                            response.setContentType("application/json;charset=UTF-8");
-                            response.getWriter().write(
-                                    "{\"status\":401,\"error\":\"UNAUTHORIZED\",\"message\":\"Credenciales requeridas o inválidas\"}");
-                        })
-                        .accessDeniedHandler((request, response, ex) -> {
-                            response.setStatus(HttpStatus.FORBIDDEN.value());
-                            response.setContentType("application/json;charset=UTF-8");
-                            response.getWriter().write(
-                                    "{\"status\":403,\"error\":\"FORBIDDEN\",\"message\":\"Usuario autenticado sin permisos para este canal\"}");
-                        }));
+            .csrf(csrf -> csrf.disable())
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/actuator/**").permitAll()
+                // Cubre tanto /api/mobile/** como /mobile/**
+                .requestMatchers("/api/mobile/**", "/mobile/**").hasAuthority("SCOPE_mobile")
+                .anyRequest().hasAuthority("SCOPE_mobile")) // Exige el scope Mobile a cualquier otra ruta protegida
+            .oauth2ResourceServer(oauth2 -> oauth2
+                .jwt(Customizer.withDefaults())
+                .authenticationEntryPoint((request, response, ex) -> {
+                    response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.getWriter().write("{\"status\":401,\"error\":\"UNAUTHORIZED\",\"message\":\"Token JWT requerido, inválido o expirado\"}");
+                })
+                .accessDeniedHandler((request, response, ex) -> {
+                    response.setStatus(HttpStatus.FORBIDDEN.value());
+                    response.setContentType("application/json;charset=UTF-8");
+                    response.getWriter().write("{\"status\":403,\"error\":\"FORBIDDEN\",\"message\":\"Token sin scope requerido para el canal Mobile\"}");
+                })
+            );
 
         return http.build();
     }

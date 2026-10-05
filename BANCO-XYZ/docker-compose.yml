@@ -1,4 +1,85 @@
 services:
+  auth-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - MODULE_NAME=auth-server
+    container_name: auth-server
+    ports:
+      - "9000:9000"
+    restart: on-failure
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:9000/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+  kafka:
+    image: apache/kafka:3.7.0
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:29093'
+      KAFKA_LISTENERS: 'PLAINTEXT://kafka:29092,CONTROLLER://kafka:29093,PLAINTEXT_HOST://0.0.0.0:9092'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
+      KAFKA_CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server 127.0.0.1:9092 --list || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+
+  config-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - MODULE_NAME=config-server
+    container_name: config-server
+    ports:
+      - "8888:8888"
+    restart: on-failure
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8888/bff-mobile/default || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+  discovery-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - MODULE_NAME=discovery-server
+    container_name: discovery-server
+    ports:
+      - "8761:8761"
+    restart: on-failure
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8761/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    depends_on:
+      config-server:
+        condition: service_healthy
+
   mysql-db:
     image: mysql:8.0
     container_name: mysql-db
@@ -10,12 +91,16 @@ services:
       - "3307:3306"
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pdesaPOO#2"]
-      interval: 5s
+      interval: 10s
       timeout: 5s
-      retries: 10
+      retries: 15
 
   banco-core:
-    build: ./banco-core
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - MODULE_NAME=banco-core
     container_name: banco-core
     ports:
       - "8080:8080"
@@ -26,43 +111,81 @@ services:
     depends_on:
       mysql-db:
         condition: service_healthy
-
+      config-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
 
   bff-web:
-    build: ./bff-web
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - MODULE_NAME=bff-web
     container_name: bff-web
     ports:
       - "8081:8081"
     environment:
       - CORE_BANCO_BASE_URL=http://banco-core:8080
-      - ATM_PASSWORD=atm123
-      - WEB_PASSWORD=web123
-      - MOBILE_PASSWORD=mobile123
+    restart: on-failure
     depends_on:
-      - banco-core
+      config-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+      auth-server:
+        condition: service_started
+      banco-core:
+        condition: service_started
+      kafka:
+        condition: service_healthy
 
   bff-mobile:
-    build: ./bff-mobile
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - MODULE_NAME=bff-mobile
     container_name: bff-mobile
     ports:
       - "8082:8082"
     environment:
       - CORE_BANCO_BASE_URL=http://banco-core:8080
-      - ATM_PASSWORD=atm123
-      - WEB_PASSWORD=web123
-      - MOBILE_PASSWORD=mobile123
+    restart: on-failure
     depends_on:
-      - banco-core
+      config-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+      auth-server:
+        condition: service_started
+      banco-core:
+        condition: service_started
+      kafka:
+        condition: service_healthy
 
   bff-atm:
-    build: ./bff-atm
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - MODULE_NAME=bff-atm
     container_name: bff-atm
     ports:
       - "8083:8083"
     environment:
       - CORE_BANCO_BASE_URL=http://banco-core:8080
-      - ATM_PASSWORD=atm123
-      - WEB_PASSWORD=web123
-      - MOBILE_PASSWORD=mobile123
+    restart: on-failure
     depends_on:
-      - banco-core
+      config-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+      auth-server:
+        condition: service_started
+      banco-core:
+        condition: service_started
+      kafka:
+        condition: service_healthy

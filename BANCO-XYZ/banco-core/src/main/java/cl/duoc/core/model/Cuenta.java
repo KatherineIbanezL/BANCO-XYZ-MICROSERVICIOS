@@ -16,7 +16,7 @@ public class Cuenta {
     private String fecha;
     
     @Column(name = "transaccion")
-    private String transaccion; // Coincide con la columna del CSV
+    private String transaccion;
     
     private Double monto;
     private String descripcion;

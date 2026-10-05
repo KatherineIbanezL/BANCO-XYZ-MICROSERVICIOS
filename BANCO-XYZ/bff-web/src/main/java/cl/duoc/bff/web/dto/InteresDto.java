@@ -4,6 +4,6 @@ public record InteresDto(
     Long cuentaId,
     String nombre,
     Double saldo,
-    Integer edad,
+    Double edad,
     String tipo
 ) {}

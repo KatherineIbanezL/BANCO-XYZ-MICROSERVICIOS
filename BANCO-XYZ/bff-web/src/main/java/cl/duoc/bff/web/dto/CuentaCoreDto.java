@@ -1,9 +1,11 @@
 package cl.duoc.bff.web.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public record CuentaCoreDto(
     Long id,
     Long cuentaId,
-    String tipo,
+    @JsonProperty("transaccion") String tipo,
     Double monto,
     String fecha
 ) {}
