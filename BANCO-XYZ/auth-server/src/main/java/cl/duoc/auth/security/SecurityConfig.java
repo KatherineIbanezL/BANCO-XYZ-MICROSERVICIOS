@@ -1,4 +1,4 @@
-package cl.duoc.auth.config;
+package cl.duoc.auth.security;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
