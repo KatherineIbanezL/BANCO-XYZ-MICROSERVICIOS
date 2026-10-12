@@ -1,0 +1,11 @@
+cl\duoc\pagos\service\PagoService.class
+cl\duoc\pagos\ProcesamientoPagosApplication.class
+cl\duoc\pagos\config\TransaccionesDiariasBatchConfig.class
+cl\duoc\pagos\model\Transaccion.class
+cl\duoc\pagos\repository\TransaccionRepository.class
+cl\duoc\pagos\security\SecurityConfig.class
+cl\duoc\pagos\dto\MovimientoDiarioDTO.class
+cl\duoc\pagos\config\TransaccionesDiariasBatchConfig$2.class
+cl\duoc\pagos\controller\PagoController.class
+cl\duoc\pagos\config\TransaccionesDiariasBatchConfig$1.class
+cl\duoc\pagos\controller\BatchController.class

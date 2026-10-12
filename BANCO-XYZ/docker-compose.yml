@@ -10,11 +10,13 @@ services:
       - "9000:9000"
     restart: on-failure
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:9000/actuator/health || exit 1"]
+      test: ["CMD-SHELL", "wget --no-check-certificate --no-verbose --tries=1 --spider https://localhost:9000/actuator/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 10
       start_period: 15s
+    networks:
+      - banco-network
 
   kafka:
     image: apache/kafka:3.7.0
@@ -42,6 +44,8 @@ services:
       timeout: 10s
       retries: 10
       start_period: 30s
+    networks:
+      - banco-network
 
   config-server:
     build:
@@ -59,6 +63,8 @@ services:
       timeout: 5s
       retries: 10
       start_period: 15s
+    networks:
+      - banco-network
 
   discovery-server:
     build:
@@ -79,6 +85,8 @@ services:
     depends_on:
       config-server:
         condition: service_healthy
+    networks:
+      - banco-network
 
   mysql-db:
     image: mysql:8.0
@@ -94,29 +102,107 @@ services:
       interval: 10s
       timeout: 5s
       retries: 15
+    networks:
+      - banco-network
 
-  banco-core:
+  ms-gestion-clientes:
     build:
       context: .
       dockerfile: Dockerfile
       args:
-        - MODULE_NAME=banco-core
-    container_name: banco-core
+        - MODULE_NAME=ms-gestion-clientes
+    container_name: ms-gestion-clientes
     ports:
-      - "8080:8080"
+      - "8084:8084"
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/banco_xyz?useSSL=false&serverTimezone=UTC
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/banco_xyz?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=desaPOO#2
+      - JAVA_TOOL_OPTIONS=-Djavax.net.ssl.trustStore=/keystore.p12 -Djavax.net.ssl.trustStorePassword=password123 -Djavax.net.ssl.trustStoreType=PKCS12
+      - BATCH_DATA_BASE_PATH=/data
+    volumes:
+      - ./auth-server/src/main/resources/keystore.p12:/keystore.p12
+      - ./data:/data
     depends_on:
-      mysql-db:
-        condition: service_healthy
       config-server:
         condition: service_healthy
       discovery-server:
         condition: service_healthy
+      mysql-db:
+        condition: service_healthy
+    networks:
+      - banco-network
+
+  ms-gestion-cuentas:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - MODULE_NAME=ms-gestion-cuentas
+    container_name: ms-gestion-cuentas
+    ports:
+      - "8085:8085"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/banco_xyz?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=desaPOO#2
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - JAVA_TOOL_OPTIONS=-Djavax.net.ssl.trustStore=/keystore.p12 -Djavax.net.ssl.trustStorePassword=password123 -Djavax.net.ssl.trustStoreType=PKCS12
+      - BATCH_DATA_BASE_PATH=/data
+    volumes:
+      - ./auth-server/src/main/resources/keystore.p12:/keystore.p12
+      - ./data:/data
+    depends_on:
+      config-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+      mysql-db:
+        condition: service_healthy
       kafka:
         condition: service_healthy
+    networks:
+      - banco-network
+
+  ms-procesamiento-pagos:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - MODULE_NAME=ms-procesamiento-pagos
+    container_name: ms-procesamiento-pagos
+    ports:
+      - "8086:8086"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:8761/eureka/
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/banco_xyz?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=desaPOO#2
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - JAVA_TOOL_OPTIONS=-Djavax.net.ssl.trustStore=/keystore.p12 -Djavax.net.ssl.trustStorePassword=password123 -Djavax.net.ssl.trustStoreType=PKCS12
+      - BATCH_DATA_BASE_PATH=/data
+    volumes:
+      - ./auth-server/src/main/resources/keystore.p12:/keystore.p12
+      - ./data:/data
+    depends_on:
+      config-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+      mysql-db:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      - banco-network
 
   bff-web:
     build:
@@ -127,9 +213,11 @@ services:
     container_name: bff-web
     ports:
       - "8081:8081"
-    environment:
-      - CORE_BANCO_BASE_URL=http://banco-core:8080
     restart: on-failure
+    environment:
+      - JAVA_TOOL_OPTIONS=-Djavax.net.ssl.trustStore=/keystore.p12 -Djavax.net.ssl.trustStorePassword=password123 -Djavax.net.ssl.trustStoreType=PKCS12
+    volumes:
+      - ./auth-server/src/main/resources/keystore.p12:/keystore.p12
     depends_on:
       config-server:
         condition: service_healthy
@@ -137,10 +225,12 @@ services:
         condition: service_healthy
       auth-server:
         condition: service_started
-      banco-core:
+      ms-gestion-clientes:
         condition: service_started
-      kafka:
-        condition: service_healthy
+      ms-gestion-cuentas:
+        condition: service_started
+    networks:
+      - banco-network
 
   bff-mobile:
     build:
@@ -151,9 +241,11 @@ services:
     container_name: bff-mobile
     ports:
       - "8082:8082"
-    environment:
-      - CORE_BANCO_BASE_URL=http://banco-core:8080
     restart: on-failure
+    environment:
+      - JAVA_TOOL_OPTIONS=-Djavax.net.ssl.trustStore=/keystore.p12 -Djavax.net.ssl.trustStorePassword=password123 -Djavax.net.ssl.trustStoreType=PKCS12
+    volumes:
+      - ./auth-server/src/main/resources/keystore.p12:/keystore.p12
     depends_on:
       config-server:
         condition: service_healthy
@@ -161,10 +253,10 @@ services:
         condition: service_healthy
       auth-server:
         condition: service_started
-      banco-core:
+      ms-gestion-cuentas:
         condition: service_started
-      kafka:
-        condition: service_healthy
+    networks:
+      - banco-network
 
   bff-atm:
     build:
@@ -175,9 +267,11 @@ services:
     container_name: bff-atm
     ports:
       - "8083:8083"
-    environment:
-      - CORE_BANCO_BASE_URL=http://banco-core:8080
     restart: on-failure
+    environment:
+      - JAVA_TOOL_OPTIONS=-Djavax.net.ssl.trustStore=/keystore.p12 -Djavax.net.ssl.trustStorePassword=password123 -Djavax.net.ssl.trustStoreType=PKCS12
+    volumes:
+      - ./auth-server/src/main/resources/keystore.p12:/keystore.p12
     depends_on:
       config-server:
         condition: service_healthy
@@ -185,7 +279,11 @@ services:
         condition: service_healthy
       auth-server:
         condition: service_started
-      banco-core:
+      ms-procesamiento-pagos:
         condition: service_started
-      kafka:
-        condition: service_healthy
+    networks:
+      - banco-network
+
+networks:
+  banco-network:
+    driver: bridge

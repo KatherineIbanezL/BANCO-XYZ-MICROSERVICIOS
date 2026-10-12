@@ -8,7 +8,9 @@ WORKDIR /app
 COPY pom.xml .
 COPY shared-events/pom.xml shared-events/
 COPY auth-server/pom.xml auth-server/
-COPY banco-core/pom.xml banco-core/
+COPY ms-gestion-clientes/pom.xml ms-gestion-clientes/
+COPY ms-gestion-cuentas/pom.xml ms-gestion-cuentas/
+COPY ms-procesamiento-pagos/pom.xml ms-procesamiento-pagos/
 COPY bff-web/pom.xml bff-web/
 COPY bff-mobile/pom.xml bff-mobile/
 COPY bff-atm/pom.xml bff-atm/
@@ -24,7 +26,7 @@ RUN chmod +x ./mvnw
 COPY . .
 
 # Argumento para indicar qué módulo compilar
-ARG MODULE_NAME=banco-core
+ARG MODULE_NAME=discovery-server
 RUN ./mvnw clean package -pl ${MODULE_NAME} -am -DskipTests
 
 # ==========================================
@@ -33,7 +35,7 @@ RUN ./mvnw clean package -pl ${MODULE_NAME} -am -DskipTests
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
-ARG MODULE_NAME=banco-core
+ARG MODULE_NAME=discovery-server
 COPY --from=build /app/${MODULE_NAME}/target/*.jar app.jar
 
 ENTRYPOINT ["java", "-jar", "app.jar"]

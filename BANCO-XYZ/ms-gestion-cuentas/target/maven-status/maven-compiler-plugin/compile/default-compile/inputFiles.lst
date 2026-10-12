@@ -1,0 +1,13 @@
+C:\Users\Katherine\Desktop\BANCO-XYZ-MICROSERVICIOS\BANCO-XYZ\ms-gestion-cuentas\src\main\java\cl\duoc\cuentas\config\InteresesBatchConfig.java
+C:\Users\Katherine\Desktop\BANCO-XYZ-MICROSERVICIOS\BANCO-XYZ\ms-gestion-cuentas\src\main\java\cl\duoc\cuentas\consumer\PagoConsumer.java
+C:\Users\Katherine\Desktop\BANCO-XYZ-MICROSERVICIOS\BANCO-XYZ\ms-gestion-cuentas\src\main\java\cl\duoc\cuentas\controller\BatchController.java
+C:\Users\Katherine\Desktop\BANCO-XYZ-MICROSERVICIOS\BANCO-XYZ\ms-gestion-cuentas\src\main\java\cl\duoc\cuentas\controller\CuentaController.java
+C:\Users\Katherine\Desktop\BANCO-XYZ-MICROSERVICIOS\BANCO-XYZ\ms-gestion-cuentas\src\main\java\cl\duoc\cuentas\dto\EstadoAnualDTO.java
+C:\Users\Katherine\Desktop\BANCO-XYZ-MICROSERVICIOS\BANCO-XYZ\ms-gestion-cuentas\src\main\java\cl\duoc\cuentas\dto\LegacyDataDTO.java
+C:\Users\Katherine\Desktop\BANCO-XYZ-MICROSERVICIOS\BANCO-XYZ\ms-gestion-cuentas\src\main\java\cl\duoc\cuentas\GestionCuentasApplication.java
+C:\Users\Katherine\Desktop\BANCO-XYZ-MICROSERVICIOS\BANCO-XYZ\ms-gestion-cuentas\src\main\java\cl\duoc\cuentas\model\Cuenta.java
+C:\Users\Katherine\Desktop\BANCO-XYZ-MICROSERVICIOS\BANCO-XYZ\ms-gestion-cuentas\src\main\java\cl\duoc\cuentas\model\Interes.java
+C:\Users\Katherine\Desktop\BANCO-XYZ-MICROSERVICIOS\BANCO-XYZ\ms-gestion-cuentas\src\main\java\cl\duoc\cuentas\repository\CuentaRepository.java
+C:\Users\Katherine\Desktop\BANCO-XYZ-MICROSERVICIOS\BANCO-XYZ\ms-gestion-cuentas\src\main\java\cl\duoc\cuentas\repository\InteresRepository.java
+C:\Users\Katherine\Desktop\BANCO-XYZ-MICROSERVICIOS\BANCO-XYZ\ms-gestion-cuentas\src\main\java\cl\duoc\cuentas\security\SecurityConfig.java
+C:\Users\Katherine\Desktop\BANCO-XYZ-MICROSERVICIOS\BANCO-XYZ\ms-gestion-cuentas\src\main\java\cl\duoc\cuentas\service\CuentaService.java

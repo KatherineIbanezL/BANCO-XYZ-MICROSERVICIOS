@@ -1,7 +1,7 @@
 package cl.duoc.bff.atm.controller;
 
 import cl.duoc.bff.atm.dto.AtmResponseDTO;
-import cl.duoc.bff.atm.dto.InteresDto;
+import cl.duoc.bff.atm.dto.CuentaDTO;
 import cl.duoc.bff.atm.service.AtmService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,23 +16,22 @@ public class AtmBffController {
         this.atmService = atmService;
     }
 
-    @GetMapping("/intereses/{cuentaId}")
-    public ResponseEntity<InteresDto> consultarInteres(@PathVariable Long cuentaId) {
-        InteresDto response = atmService.obtenerInteresAtm(cuentaId);
+    @PostMapping("/retiro")
+    public ResponseEntity<AtmResponseDTO> procesarRetiro(
+            @RequestParam Long cuentaId, 
+            @RequestParam double monto, 
+            @RequestHeader("Authorization") String token) {
+        
+        AtmResponseDTO response = atmService.procesarRetiro(cuentaId, monto, token);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/saldo/{cuentaId}")
-    public ResponseEntity<AtmResponseDTO> consultarSaldo(@PathVariable String cuentaId) {
-        AtmResponseDTO response = atmService.obtenerSaldoAtm(cuentaId);
-        return ResponseEntity.ok(response);
-    }
-
-    @PutMapping("/retirar/{cuentaId}")
-    public ResponseEntity<AtmResponseDTO> retirarEfectivo(
-            @PathVariable String cuentaId, 
-            @RequestParam double monto) {
-        AtmResponseDTO response = atmService.retirarEfectivo(cuentaId, monto);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<CuentaDTO> consultarSaldo(
+            @PathVariable Long cuentaId,
+            @RequestHeader("Authorization") String token) {
+        
+        CuentaDTO cuenta = atmService.consultarSaldo(cuentaId, token);
+        return ResponseEntity.ok(cuenta);
     }
 }

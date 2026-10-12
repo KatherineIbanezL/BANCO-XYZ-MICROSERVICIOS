@@ -15,9 +15,12 @@ public class WebBffController {
         this.webService = webService;
     }
 
-    @GetMapping("/dashboard/{cuentaId}")
-    public ResponseEntity<WebDashboardDTO> obtenerDashboard(@PathVariable String cuentaId) {
-        WebDashboardDTO dashboard = webService.obtenerDashboardWeb(cuentaId);
+    @GetMapping("/dashboard/{clienteId}")
+    public ResponseEntity<WebDashboardDTO> obtenerDashboard(
+            @PathVariable Long clienteId,
+            @RequestHeader("Authorization") String token) {
+        
+        WebDashboardDTO dashboard = webService.obtenerDashboardCompleto(clienteId, token);
         return ResponseEntity.ok(dashboard);
     }
 }

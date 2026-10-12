@@ -13,17 +13,19 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(RestClientException.class)
-    ResponseEntity<Map<String, Object>> coreUnavailable(RestClientException ex) {
+    ResponseEntity<Map<String, Object>> serviceUnavailable(RestClientException ex) {
+        ex.printStackTrace();
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(Map.of(
                 "timestamp", Instant.now().toString(),
                 "status", 502,
                 "error", "BAD_GATEWAY",
-                "message", "El BFF no pudo obtener una respuesta válida desde CORE"
+                "message", "El BFF Mobile no pudo comunicarse con los microservicios del backend"
         ));
     }
 
     @ExceptionHandler(Exception.class)
     ResponseEntity<Map<String, Object>> unexpected(Exception ex) {
+        ex.printStackTrace(); 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
                 "timestamp", Instant.now().toString(),
                 "status", 500,

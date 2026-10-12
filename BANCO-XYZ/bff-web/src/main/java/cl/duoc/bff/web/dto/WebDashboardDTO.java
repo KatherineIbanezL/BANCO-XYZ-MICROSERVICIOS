@@ -3,20 +3,19 @@ package cl.duoc.bff.web.dto;
 import java.util.List;
 
 public class WebDashboardDTO {
-    private String numeroCuenta;
-    private String nombreTitular;
-    private Double saldoActual;
-    private List<CuentaCoreDto> historialTransacciones; // ¡Usa el DTO del BFF, no la entidad Cuenta del Core!
+    private ClienteDTO cliente;
+    private List<CuentaDTO> cuentas;
 
-    public WebDashboardDTO(String numeroCuenta, String nombreTitular, Double saldoActual, List<CuentaCoreDto> historialTransacciones) {
-        this.numeroCuenta = numeroCuenta;
-        this.nombreTitular = nombreTitular;
-        this.saldoActual = saldoActual;
-        this.historialTransacciones = historialTransacciones;
+    public WebDashboardDTO() {}
+
+    public WebDashboardDTO(ClienteDTO cliente, List<CuentaDTO> cuentas) {
+        this.cliente = cliente;
+        this.cuentas = cuentas;
     }
 
-    public String getNumeroCuenta() { return numeroCuenta; }
-    public String getNombreTitular() { return nombreTitular; }
-    public Double getSaldoActual() { return saldoActual; }
-    public List<CuentaCoreDto> getHistorialTransacciones() { return historialTransacciones; }
+    public ClienteDTO getCliente() { return cliente; }
+    public void setCliente(ClienteDTO cliente) { this.cliente = cliente; }
+
+    public List<CuentaDTO> getCuentas() { return cuentas; }
+    public void setCuentas(List<CuentaDTO> cuentas) { this.cuentas = cuentas; }
 }

@@ -22,7 +22,9 @@
         <module>auth-server</module>
         <module>shared-events</module>
         <module>config-server</module>
-        <module>banco-core</module>
+        <module>ms-gestion-clientes</module>
+        <module>ms-gestion-cuentas</module>
+        <module>ms-procesamiento-pagos</module>
         <module>bff-atm</module>
         <module>bff-mobile</module>
         <module>bff-web</module>

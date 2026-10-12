@@ -1,197 +1,48 @@
-# BANCO-XYZ: Sistema de Microservicios Resilientes y Seguros en la Nube
+# Proyecto Banco XYZ - Arquitectura de Microservicios y Migración Batch
 
-**Asignatura:** Desarrollo Backend III (PBY2203)
-**Institución:** Duoc UC
-**Evaluación:** "Desarrollando microservicios y resiliencia en la nube con Spring Cloud"
+Este repositorio contiene el código fuente del proyecto de modernización del sistema de gestión bancaria para el **Banco XYZ**. La solución migra un sistema monolítico legacy hacia una arquitectura distribuida basada en microservicios, implementando orquestación, mensajería asíncrona, resiliencia y procesamiento de datos masivos.
 
----
+**🔗 Enlace al Repositorio Oficial:** https://github.com/KatherineIbanezL/BANCO-XYZ-MICROSERVICIOS/tree/main
 
-## 1. Descripción y Objetivo del Proyecto
+## Stack Tecnológico
+* **Backend Core:** Java 17, Spring Boot 3.x
+* **Infraestructura Spring Cloud:** Netflix Eureka (Service Discovery), Spring Cloud Config Server
+* **Integración y BFF:** Spring Cloud Gateway, Resilience4j (Circuit Breaker)
+* **Seguridad:** Spring Security, OAuth2 (Resource Server & JWT)
+* **Persistencia:** Spring Data JPA, Hibernate, MySQL 8
+* **Mensajería Asíncrona:** Apache Kafka
+* **Procesamiento de Datos (ETL):** Spring Batch (Chunk-oriented processing)
+* **Contenerización y Orquestación:** Docker, Docker Compose
 
-El proyecto **BANCO-XYZ** es una solución bancaria basada en una arquitectura de microservicios distribuida, resiliente y segura. Permite la gestión de cuentas, consultas de saldo, transacciones (retiros/depósitos) y procesamiento por lotes.
+## Arquitectura del Sistema
+El ecosistema se compone de las siguientes piezas principales:
+* **Microservicios Core:** `ms-gestion-clientes`, `ms-gestion-cuentas`, `ms-procesamiento-pagos`.
+* **Capas BFF (Backend for Frontend):** `bff-web`, `bff-mobile`, `bff-atm` (Optimizados por canal y protegidos con tokens JWT).
+* **Servicios Base:** Servidor de Descubrimiento (Eureka) y Servidor de Configuración centralizado.
+* **Bus de Eventos:** Apache Kafka para garantizar la consistencia eventual entre los pagos y la actualización de saldos en las cuentas.
 
-### Objetivos Clave:
-* **Seguridad Centralizada:** Implementación del protocolo OAuth2.0 y JWT mediante Spring Cloud Security y un Servidor de Autorización (`auth-server`).
-* **Contenedorización y Orquestación:** Empaquetado de microservicios con Docker multi-stage y orquestación unificada mediante `docker-compose.yaml`.
-* **Tolerancia a Fallos:** Implementación de patrones Circuit Breaker y Fallback con Resilience4j en los BFFs.
-* **Mensajería Asíncrona:** Integración de Apache Kafka para la publicación y consumo asíncrono de eventos transaccionales.
+## Requisitos Previos
+1. Java 17 instalado en el entorno local (para desarrollo o compilación manual).
+2. Maven 3.8+ (o utilizar el wrapper `mvnw` incluido en el proyecto).
+3. Docker y Docker Compose instalados y en ejecución.
+4. Postman (o similar) para probar los endpoints y simular peticiones con tokens JWT.
 
----
+## Estructura del Proyecto
+* `/discovery-server`: Servidor Eureka (Puerto 8761).
+* `/config-server`: Servidor de configuraciones centralizado (Puerto 8888).
+* `/auth-server`: Servidor de autorización para emitir tokens OAuth2 (Puerto 9000).
+* `/ms-gestion-clientes`: Microservicio de clientes y Job Batch de migración (Puerto 8084).
+* `/ms-gestion-cuentas`: Microservicio de saldos y consumidor de eventos Kafka (Puerto 8085).
+* `/ms-procesamiento-pagos`: Microservicio de transacciones y productor de eventos Kafka (Puerto 8086).
+* `/bff-web`, `/bff-mobile`, `/bff-atm`: Puertas de enlace seguras para cada plataforma.
+* `/data`: Directorio mapeado como volumen en Docker para la ingesta de archivos CSV legacy.
 
-## 2. Arquitectura del Sistema
+## Despliegue Rápido (Local)
+Para levantar toda la infraestructura del banco en contenedores aislados, sigue estos pasos desde la raíz del proyecto:
+1. Asegúrate de tener los puertos requeridos (3306, 8761, 8888, 9092, etc.) libres en tu máquina.
+2. Abre una terminal en la raíz del proyecto (donde se ubica el archivo `docker-compose.yml`).
+3. Ejecuta el comando: `docker compose up -d` (esto construirá las imágenes y levantará la red interna).
+4. Verifica que todos los contenedores estén saludables ejecutando: `docker compose ps`.
+5. Accede a `http://localhost:8761` para visualizar el panel de Eureka y confirmar que los servicios se han registrado correctamente.
 
-```text
-                        +----------------------+
-                        |    config-server     | (Puerto 8888)
-                        +----------+-----------+
-                                   |
-                        +----------v-----------+
-                        |   discovery-server   | (Eureka - Puerto 8761)
-                        +----------+-----------+
-                                   |
-                        +----------v-----------+
-                        |      auth-server     | (OAuth2 / JWT - Puerto 9000)
-                        +----------+-----------+
-                                   |
-                            Valida JWT/Scopes
-                                   |
-        +--------------------------+--------------------------+
-        |                          |                          |
-+-------v--------+        +--------v-------+        +---------v--------+
-|    bff-web     |        |   bff-mobile   |        |     bff-atm      |
-| (Puerto 8081)  |        | (Puerto 8082)  |        | (Puerto 8083)    |
-+-------+--------+        +--------+-------+        +---------+--------+
-        |                          |                          |
-        | Rest Client + CB         | Resilience4j Fallback    | Kafka Producer
-        |                          |                          |
-        +--------------------------+--------------------------+
-                                   |
-                        +----------v-----------+
-                        |      banco-core      | <--- Eventos Kafka
-                        |   Resource Server    |      (transacciones-topic)
-                        |    (Puerto 8080)     |
-                        +----------+-----------+
-                                   |
-                        +----------v-----------+
-                        |       mysql-db       | (Puerto 3306)
-                        +----------------------+
-```
-
----
-
-## 3. Estructura del Código
-
-```text
-BANCO-XYZ/
-├── auth-server/            # Servidor de Autorización OAuth2 (Generación de JWT)
-├── config-server/          # Servidor de Configuración Centralizada (Spring Cloud Config)
-├── discovery-server/       # Servidor de Descubrimiento de Servicios (Eureka)
-├── banco-core/             # Microservicio Núcleo (Resource Server, Batch, Kafka Consumer)
-├── bff-atm/                # BFF para Canal Cajero Automático (Kafka Producer)
-├── bff-mobile/             # BFF para Canal Móvil (Resilience4j Circuit Breaker)
-├── bff-web/                # BFF para Canal Web
-├── evidencias/             # Capturas de pantalla y evidencias de ejecución
-├── docker-compose.yaml     # Archivo de orquestación de contenedores
-├── pom.xml                 # POM padre del proyecto Maven
-└── README.md               # Documentación del proyecto
-```
-
----
-
-## 4. Tecnologías Utilizadas
-
-* **Java 21 / Spring Boot 3.x**
-* **Spring Cloud:** Eureka Server, Config Server, OpenFeign
-* **Spring Security & OAuth2:** JWT, Resource Server
-* **Resilience4j:** Circuit Breaker, Fallback
-* **Apache Kafka:** Event-Driven Architecture
-* **Spring Batch:** Procesamiento masivo por lotes
-* **MySQL 8.0 & Spring Data JPA**
-* **Docker & Docker Compose**
-
----
-
-## 5. Puertos y Servicios
-
-| Servicio | Puerto | Descripción / Acceso |
-| :--- | :--- | :--- |
-| `config-server` | `8888` | Servidor de configuración centralizada |
-| `discovery-server` | `8761` | Dashboard Eureka (`http://localhost:8761`) |
-| `auth-server` | `9000` | Servidor de Autorización OAuth2 |
-| `banco-core` | `8080` | Core Bancario (Resource Server) |
-| `bff-web` | `8081` | BFF Canal Web |
-| `bff-mobile` | `8082` | BFF Canal Móvil |
-| `bff-atm` | `8083` | BFF Canal Cajero Automático |
-| `mysql-db` | `3306` | Base de Datos MySQL |
-
----
-
-## 6. Datos de Prueba y Credenciales
-
-* **Credenciales Client Credentials (OAuth2):**
-  * `client-id`: `demo-client`
-  * `client-secret`: `demo-secret`
-* **Cuentas de Prueba Pre-cargadas (`mysql-db`):**
-  * `ID 106`: Cuenta activa asociada a canal ATM.
-  * `ID 103`: Cuenta activa asociada a canal Móvil.
-
----
-
-## 7. Instrucciones de Ejecución
-
-### Requisitos Previos:
-* **Docker Desktop** activo.
-* **Docker Compose v2** instalado.
-
-### Despliegue Unificado:
-
-```bash
-# 1. Clonar el repositorio y posicionarse en la carpeta raíz del proyecto
-cd BANCO-XYZ
-
-# 2. Compilar y levantar la infraestructura con Docker Compose
-docker-compose up --build
-
-# 3. Verificar el estado de los contenedores
-docker-compose ps
-```
-
----
-
-## 8. Guía de Pruebas y Validación
-
-### A. Validación de Seguridad (OAuth2 / Scopes)
-
-```bash
-# 1. Rechazo sin autenticación (401 Unauthorized)
-curl -i http://localhost:8083/api/atm/saldo/106
-
-# 2. Generación de Token JWT (scope=atm)
-curl -u demo-client:demo-secret \
-  -d "grant_type=client_credentials&scope=atm" \
-  http://localhost:9000/oauth2/token
-
-# 3. Acceso denegado por Scope Cruzado (403 Forbidden)
-curl -i -H "Authorization: Bearer <TOKEN_SCOPE_MOBILE>" \
-  http://localhost:8083/api/atm/saldo/106
-
-# 4. Acceso Exitoso (200 OK)
-curl -H "Authorization: Bearer <TOKEN_SCOPE_ATM>" \
-  http://localhost:8083/api/atm/saldo/106
-```
-
-### B. Validación de Resiliencia (Resilience4j)
-
-```bash
-# 1. Detener el microservicio central banco-core
-docker stop banco-core
-
-# 2. Realizar petición desde bff-mobile (Respuesta esperada: 200 OK con Fallback activo)
-curl -H "Authorization: Bearer <TOKEN_MOBILE>" \
-  http://localhost:8082/api/mobile/resumen/103
-
-# 3. Restablecer el servicio
-docker start banco-core
-```
-
-### C. Validación de Mensajería Asíncrona (Kafka)
-
-```bash
-# 1. Publicar una transacción desde bff-atm
-curl -X PUT -H "Authorization: Bearer <TOKEN_ATM>" \
-  "http://localhost:8083/api/atm/retirar/106?monto=1000"
-
-# 2. Verificar el procesamiento del evento en los logs del consumidor banco-core
-docker logs --tail 30 banco-core
-```
-
-### D. Validación de Procesamiento por Lotes (Spring Batch)
-
-```bash
-# 1. Ejecutar el Job de procesamiento masivo
-curl -X POST -H "Authorization: Bearer <TOKEN_ATM>" \
-  http://localhost:8080/api/batch/ejecutar-cierre
-
-# 2. Verificar en los logs la ejecución del Job
-docker logs --tail 50 banco-core
-```
+*Nota: Para instrucciones detalladas sobre cómo probar los procesos de Spring Batch y consumir las APIs a través de los BFF, consulta el archivo `instrucciones.md`.*

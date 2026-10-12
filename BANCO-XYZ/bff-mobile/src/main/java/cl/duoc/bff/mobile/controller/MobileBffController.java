@@ -16,8 +16,8 @@ public class MobileBffController {
     }
 
     @GetMapping("/resumen/{cuentaId}")
-    public ResponseEntity<MobileSummaryDTO> obtenerResumen(@PathVariable String cuentaId) {
-        MobileSummaryDTO resumen = mobileService.obtenerResumenMobile(cuentaId);
+    public ResponseEntity<MobileSummaryDTO> obtenerResumen(@PathVariable Long cuentaId, @RequestHeader("Authorization") String token) {
+        MobileSummaryDTO resumen = mobileService.obtenerResumenMobile(cuentaId, token);
         return ResponseEntity.ok(resumen);
     }
 }

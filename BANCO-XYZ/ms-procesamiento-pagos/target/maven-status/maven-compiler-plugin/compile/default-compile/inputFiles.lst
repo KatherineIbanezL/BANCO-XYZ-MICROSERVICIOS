@@ -1,0 +1,9 @@
+C:\Users\Katherine\Desktop\BANCO-XYZ-MICROSERVICIOS\BANCO-XYZ\ms-procesamiento-pagos\src\main\java\cl\duoc\pagos\config\TransaccionesDiariasBatchConfig.java
+C:\Users\Katherine\Desktop\BANCO-XYZ-MICROSERVICIOS\BANCO-XYZ\ms-procesamiento-pagos\src\main\java\cl\duoc\pagos\controller\BatchController.java
+C:\Users\Katherine\Desktop\BANCO-XYZ-MICROSERVICIOS\BANCO-XYZ\ms-procesamiento-pagos\src\main\java\cl\duoc\pagos\controller\PagoController.java
+C:\Users\Katherine\Desktop\BANCO-XYZ-MICROSERVICIOS\BANCO-XYZ\ms-procesamiento-pagos\src\main\java\cl\duoc\pagos\dto\MovimientoDiarioDTO.java
+C:\Users\Katherine\Desktop\BANCO-XYZ-MICROSERVICIOS\BANCO-XYZ\ms-procesamiento-pagos\src\main\java\cl\duoc\pagos\model\Transaccion.java
+C:\Users\Katherine\Desktop\BANCO-XYZ-MICROSERVICIOS\BANCO-XYZ\ms-procesamiento-pagos\src\main\java\cl\duoc\pagos\ProcesamientoPagosApplication.java
+C:\Users\Katherine\Desktop\BANCO-XYZ-MICROSERVICIOS\BANCO-XYZ\ms-procesamiento-pagos\src\main\java\cl\duoc\pagos\repository\TransaccionRepository.java
+C:\Users\Katherine\Desktop\BANCO-XYZ-MICROSERVICIOS\BANCO-XYZ\ms-procesamiento-pagos\src\main\java\cl\duoc\pagos\security\SecurityConfig.java
+C:\Users\Katherine\Desktop\BANCO-XYZ-MICROSERVICIOS\BANCO-XYZ\ms-procesamiento-pagos\src\main\java\cl\duoc\pagos\service\PagoService.java

@@ -1,0 +1,10 @@
+C:\Users\Katherine\Desktop\BANCO-XYZ-MICROSERVICIOS\BANCO-XYZ\ms-gestion-clientes\src\main\java\cl\duoc\clientes\config\EstadosAnualesBatchConfig.java
+C:\Users\Katherine\Desktop\BANCO-XYZ-MICROSERVICIOS\BANCO-XYZ\ms-gestion-clientes\src\main\java\cl\duoc\clientes\controller\BatchController.java
+C:\Users\Katherine\Desktop\BANCO-XYZ-MICROSERVICIOS\BANCO-XYZ\ms-gestion-clientes\src\main\java\cl\duoc\clientes\controller\ClienteController.java
+C:\Users\Katherine\Desktop\BANCO-XYZ-MICROSERVICIOS\BANCO-XYZ\ms-gestion-clientes\src\main\java\cl\duoc\clientes\dto\EstadoAnualDTO.java
+C:\Users\Katherine\Desktop\BANCO-XYZ-MICROSERVICIOS\BANCO-XYZ\ms-gestion-clientes\src\main\java\cl\duoc\clientes\GestionClientesApplication.java
+C:\Users\Katherine\Desktop\BANCO-XYZ-MICROSERVICIOS\BANCO-XYZ\ms-gestion-clientes\src\main\java\cl\duoc\clientes\model\Cliente.java
+C:\Users\Katherine\Desktop\BANCO-XYZ-MICROSERVICIOS\BANCO-XYZ\ms-gestion-clientes\src\main\java\cl\duoc\clientes\model\EstadoFinanciero.java
+C:\Users\Katherine\Desktop\BANCO-XYZ-MICROSERVICIOS\BANCO-XYZ\ms-gestion-clientes\src\main\java\cl\duoc\clientes\repository\ClienteRepository.java
+C:\Users\Katherine\Desktop\BANCO-XYZ-MICROSERVICIOS\BANCO-XYZ\ms-gestion-clientes\src\main\java\cl\duoc\clientes\repository\EstadoFinancieroRepository.java
+C:\Users\Katherine\Desktop\BANCO-XYZ-MICROSERVICIOS\BANCO-XYZ\ms-gestion-clientes\src\main\java\cl\duoc\clientes\security\SecurityConfig.java

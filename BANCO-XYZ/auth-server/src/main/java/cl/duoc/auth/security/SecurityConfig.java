@@ -56,21 +56,38 @@ public class SecurityConfig {
             .accessTokenTimeToLive(Duration.ofMinutes(30))
             .build();
 
-        // Cliente principal adaptado con los scopes de BANCO-XYZ
-        RegisteredClient demoClient = RegisteredClient.withId(UUID.randomUUID().toString())
-            .clientId("demo-client")
-            .clientSecret("{noop}demo-secret")
+        // Cliente 1: Exclusivo para Cajeros (BFF ATM)
+        RegisteredClient atmClient = RegisteredClient.withId(UUID.randomUUID().toString())
+            .clientId("atm-client")
+            .clientSecret("{noop}atm-secret")
             .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
             .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
             .scope("atm")
-            .scope("mobile")
-            .scope("web")
-            .scope("banco.read")
-            .scope("banco.write")
             .tokenSettings(tokenSettings)
             .build();
 
-        return new InMemoryRegisteredClientRepository(demoClient);
+        // Cliente 2: Exclusivo para Aplicación Móvil (BFF Mobile)
+        RegisteredClient mobileClient = RegisteredClient.withId(UUID.randomUUID().toString())
+            .clientId("mobile-client")
+            .clientSecret("{noop}mobile-secret")
+            .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+            .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+            .scope("mobile")
+            .tokenSettings(tokenSettings)
+            .build();
+
+        // Cliente 3: Exclusivo para Plataforma Web (BFF Web)
+        RegisteredClient webClient = RegisteredClient.withId(UUID.randomUUID().toString())
+            .clientId("web-client")
+            .clientSecret("{noop}web-secret")
+            .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+            .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+            .scope("web")
+            .tokenSettings(tokenSettings)
+            .build();
+
+        // Registra los 3 clientes independientes
+        return new InMemoryRegisteredClientRepository(atmClient, mobileClient, webClient);
     }
 
     @Bean
@@ -88,7 +105,7 @@ public class SecurityConfig {
     @Bean
     AuthorizationServerSettings authorizationServerSettings() {
         return AuthorizationServerSettings.builder()
-            .issuer("http://auth-server:9000")
+            .issuer("https://auth-server:9000") 
             .build();
     }
 

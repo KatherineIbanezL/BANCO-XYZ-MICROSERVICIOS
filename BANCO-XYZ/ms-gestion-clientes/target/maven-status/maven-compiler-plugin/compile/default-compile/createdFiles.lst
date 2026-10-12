@@ -1,0 +1,13 @@
+cl\duoc\clientes\controller\BatchController.class
+cl\duoc\clientes\model\Cliente.class
+cl\duoc\clientes\GestionClientesApplication.class
+cl\duoc\clientes\config\EstadosAnualesBatchConfig$3.class
+cl\duoc\clientes\repository\EstadoFinancieroRepository.class
+cl\duoc\clientes\security\SecurityConfig.class
+cl\duoc\clientes\controller\ClienteController.class
+cl\duoc\clientes\dto\EstadoAnualDTO.class
+cl\duoc\clientes\model\EstadoFinanciero.class
+cl\duoc\clientes\repository\ClienteRepository.class
+cl\duoc\clientes\config\EstadosAnualesBatchConfig.class
+cl\duoc\clientes\config\EstadosAnualesBatchConfig$2.class
+cl\duoc\clientes\config\EstadosAnualesBatchConfig$1.class

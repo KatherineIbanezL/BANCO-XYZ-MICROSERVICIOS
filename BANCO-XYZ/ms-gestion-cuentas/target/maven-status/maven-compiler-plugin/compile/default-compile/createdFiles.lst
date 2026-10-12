@@ -1,0 +1,16 @@
+cl\duoc\cuentas\config\InteresesBatchConfig$3.class
+cl\duoc\cuentas\service\CuentaService.class
+cl\duoc\cuentas\controller\CuentaController.class
+cl\duoc\cuentas\repository\CuentaRepository.class
+cl\duoc\cuentas\controller\BatchController.class
+cl\duoc\cuentas\dto\LegacyDataDTO.class
+cl\duoc\cuentas\config\InteresesBatchConfig.class
+cl\duoc\cuentas\security\SecurityConfig.class
+cl\duoc\cuentas\config\InteresesBatchConfig$1.class
+cl\duoc\cuentas\repository\InteresRepository.class
+cl\duoc\cuentas\GestionCuentasApplication.class
+cl\duoc\cuentas\consumer\PagoConsumer.class
+cl\duoc\cuentas\config\InteresesBatchConfig$2.class
+cl\duoc\cuentas\model\Interes.class
+cl\duoc\cuentas\dto\EstadoAnualDTO.class
+cl\duoc\cuentas\model\Cuenta.class
